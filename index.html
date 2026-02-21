@@ -1,53 +1,76 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Análise de Gastos no Cartão</title>
-  <link rel="stylesheet" href="styles.css" />
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-</head>
-<body>
-  <main class="container">
-    <header>
-      <h1>Análise Profunda de Gastos no Cartão</h1>
-      <p>
-        Importe sua fatura em CSV e classifique cada gasto por área para descobrir onde o dinheiro está indo.
-      </p>
-    </header>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FinanCartão | Gestão de Gastos</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app">
+      <header class="hero">
+        <h1>FinanCartão</h1>
+        <p>Classifique gastos por área, acompanhe tendências e monte uma análise mensal de verdade.</p>
+      </header>
 
-    <section class="panel upload-panel">
-      <h2>1) Importar fatura (CSV)</h2>
-      <p class="hint">Formato esperado: <strong>data,descricao,valor</strong> (valor pode ser negativo ou positivo).</p>
-      <input id="csvInput" type="file" accept=".csv" />
-      <button id="loadSampleBtn" type="button">Carregar exemplo</button>
-    </section>
+      <section class="panel actions">
+        <h2>Lançamentos</h2>
+        <form id="transactionForm" class="form-grid">
+          <label>Data
+            <input type="date" id="date" required />
+          </label>
+          <label>Descrição
+            <input type="text" id="description" placeholder="Ex.: Mercado, Uber, Farmácia" required />
+          </label>
+          <label>Valor (R$)
+            <input type="number" id="amount" step="0.01" placeholder="-150.90" required />
+          </label>
+          <label>Área
+            <select id="category"></select>
+          </label>
+          <button type="submit">Adicionar lançamento</button>
+        </form>
 
-    <section class="panel" id="transactionsPanel" hidden>
-      <h2>2) Classificar gastos por área</h2>
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Data</th>
-              <th>Descrição</th>
-              <th>Valor (R$)</th>
-              <th>Área</th>
-            </tr>
-          </thead>
-          <tbody id="transactionsBody"></tbody>
-        </table>
-      </div>
-    </section>
+        <div class="upload-row">
+          <input id="csvInput" type="file" accept=".csv" />
+          <button id="loadSampleBtn" type="button" class="secondary">Carregar exemplo</button>
+          <button id="clearBtn" type="button" class="danger">Limpar tudo</button>
+        </div>
+        <p class="hint">CSV: <strong>data,descricao,valor,categoria</strong> (categoria opcional).</p>
+      </section>
 
-    <section class="panel" id="insightsPanel" hidden>
-      <h2>3) Insights</h2>
-      <div class="cards" id="insightsCards"></div>
-      <canvas id="categoryChart" aria-label="Gráfico por área" role="img"></canvas>
-      <canvas id="monthlyChart" aria-label="Gráfico mensal" role="img"></canvas>
-    </section>
-  </main>
+      <section class="panel">
+        <h2>Resumo</h2>
+        <div id="kpis" class="kpis"></div>
+      </section>
 
-  <script src="app.js"></script>
-</body>
+      <section class="panel">
+        <div class="table-header">
+          <h2>Histórico</h2>
+          <input id="filter" type="search" placeholder="Filtrar por descrição/categoria..." />
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Data</th>
+                <th>Descrição</th>
+                <th>Valor</th>
+                <th>Área</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="transactionsBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>Análise por área</h2>
+        <div id="categoryBars"></div>
+      </section>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
 </html>

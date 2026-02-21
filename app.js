@@ -1,218 +1,219 @@
-const categories = [
-  'Moradia',
-  'Alimentação',
-  'Transporte',
-  'Saúde',
-  'Educação',
-  'Lazer',
-  'Compras',
-  'Assinaturas',
-  'Outros'
-];
+const categories = ['Moradia', 'Alimentação', 'Transporte', 'Saúde', 'Educação', 'Lazer', 'Compras', 'Assinaturas', 'Outros'];
+const state = { transactions: [], filter: '' };
 
-const csvInput = document.getElementById('csvInput');
-const loadSampleBtn = document.getElementById('loadSampleBtn');
-const transactionsPanel = document.getElementById('transactionsPanel');
-const insightsPanel = document.getElementById('insightsPanel');
-const transactionsBody = document.getElementById('transactionsBody');
-const insightsCards = document.getElementById('insightsCards');
+const els = {
+  form: document.getElementById('transactionForm'),
+  date: document.getElementById('date'),
+  description: document.getElementById('description'),
+  amount: document.getElementById('amount'),
+  category: document.getElementById('category'),
+  csvInput: document.getElementById('csvInput'),
+  loadSampleBtn: document.getElementById('loadSampleBtn'),
+  clearBtn: document.getElementById('clearBtn'),
+  filter: document.getElementById('filter'),
+  body: document.getElementById('transactionsBody'),
+  kpis: document.getElementById('kpis'),
+  bars: document.getElementById('categoryBars')
+};
 
-let transactions = [];
-let categoryChart;
-let monthlyChart;
+bootstrap();
 
-csvInput.addEventListener('change', async (event) => {
-  const file = event.target.files[0];
-  if (!file) return;
+function bootstrap() {
+  categories.forEach((cat) => {
+    const option = document.createElement('option');
+    option.value = cat;
+    option.textContent = cat;
+    els.category.appendChild(option);
+  });
 
-  const text = await file.text();
-  transactions = parseCsv(text);
-  initializeCategories();
-  renderAll();
-});
-
-loadSampleBtn.addEventListener('click', () => {
-  const sampleCsv = `data,descricao,valor
-2026-01-02,Supermercado Central,-320.89
-2026-01-03,Uber,-24.90
-2026-01-05,Netflix,-39.90
-2026-01-06,Farmácia Vida,-82.50
-2026-02-01,Aluguel,-1800.00
-2026-02-02,Restaurante Sabor,-85.20
-2026-02-03,Posto Avenida,-210.43
-2026-02-05,Loja Online,-450.00
-2026-02-10,Academia,-129.90
-2026-02-12,Curso Online,-199.00
-2026-02-15,Cinema,-47.00`;
-
-  transactions = parseCsv(sampleCsv);
-  initializeCategories();
-  renderAll();
-});
-
-function parseCsv(text) {
-  const lines = text.trim().split('\n');
-  const rows = lines.slice(1);
-
-  return rows
-    .map((line) => line.split(','))
-    .filter((fields) => fields.length >= 3)
-    .map(([date, description, value]) => ({
-      date: date.trim(),
-      description: description.trim(),
-      value: Number(value.trim()),
-      category: 'Outros'
-    }))
-    .filter((item) => Number.isFinite(item.value));
+  state.transactions = loadStorage();
+  wireEvents();
+  render();
 }
 
-function initializeCategories() {
-  transactions = transactions.map((item) => {
-    const normalized = item.description.toLowerCase();
+function wireEvents() {
+  els.form.addEventListener('submit', (event) => {
+    event.preventDefault();
+    const tx = {
+      id: crypto.randomUUID(),
+      date: els.date.value,
+      description: els.description.value.trim(),
+      amount: Number(els.amount.value),
+      category: els.category.value || 'Outros'
+    };
 
-    if (normalized.includes('supermercado') || normalized.includes('restaurante')) {
-      item.category = 'Alimentação';
-    } else if (normalized.includes('uber') || normalized.includes('posto')) {
-      item.category = 'Transporte';
-    } else if (normalized.includes('farmácia')) {
-      item.category = 'Saúde';
-    } else if (normalized.includes('netflix') || normalized.includes('cinema')) {
-      item.category = 'Lazer';
-    } else if (normalized.includes('aluguel')) {
-      item.category = 'Moradia';
-    } else if (normalized.includes('curso')) {
-      item.category = 'Educação';
-    }
+    if (!tx.date || !tx.description || !Number.isFinite(tx.amount)) return;
 
-    return item;
+    state.transactions.unshift(tx);
+    persist();
+    els.form.reset();
+    render();
+  });
+
+  els.csvInput.addEventListener('change', async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const content = await file.text();
+    const imported = parseCsv(content);
+    state.transactions = [...imported, ...state.transactions];
+    persist();
+    render();
+    els.csvInput.value = '';
+  });
+
+  els.loadSampleBtn.addEventListener('click', () => {
+    const sample = `data,descricao,valor,categoria
+2026-02-01,Aluguel,-1900,Moradia
+2026-02-02,Supermercado Bom Preço,-384.95,Alimentação
+2026-02-03,Uber,-27.50,Transporte
+2026-02-05,Cinema,-48.00,Lazer
+2026-02-10,Curso de inglês,-230,Educação
+2026-02-15,Farmácia,-80.34,Saúde`;
+    state.transactions = [...parseCsv(sample), ...state.transactions];
+    persist();
+    render();
+  });
+
+  els.clearBtn.addEventListener('click', () => {
+    state.transactions = [];
+    persist();
+    render();
+  });
+
+  els.filter.addEventListener('input', () => {
+    state.filter = els.filter.value.trim().toLowerCase();
+    renderTable();
   });
 }
 
-function renderAll() {
-  transactionsPanel.hidden = false;
-  insightsPanel.hidden = false;
+function parseCsv(text) {
+  return text.trim().split('\n').slice(1).map((line) => {
+    const [date = '', description = '', amount = '0', category = 'Outros'] = line.split(',');
+    return {
+      id: crypto.randomUUID(),
+      date: date.trim(),
+      description: description.trim(),
+      amount: Number(amount.trim()),
+      category: categories.includes(category.trim()) ? category.trim() : suggestCategory(description.trim())
+    };
+  }).filter((item) => item.date && item.description && Number.isFinite(item.amount));
+}
+
+function suggestCategory(description) {
+  const value = description.toLowerCase();
+  if (/mercado|restaurante/.test(value)) return 'Alimentação';
+  if (/uber|99|posto/.test(value)) return 'Transporte';
+  if (/aluguel|condominio/.test(value)) return 'Moradia';
+  if (/farmacia|hospital/.test(value)) return 'Saúde';
+  if (/curso|faculdade/.test(value)) return 'Educação';
+  if (/cinema|show|streaming|netflix/.test(value)) return 'Lazer';
+  return 'Outros';
+}
+
+function render() {
   renderTable();
-  renderInsights();
+  renderKpis();
+  renderCategoryBars();
 }
 
 function renderTable() {
-  transactionsBody.innerHTML = '';
+  const rows = state.transactions.filter((tx) => {
+    if (!state.filter) return true;
+    return `${tx.description} ${tx.category}`.toLowerCase().includes(state.filter);
+  });
 
-  transactions.forEach((item, index) => {
-    const row = document.createElement('tr');
+  els.body.innerHTML = '';
+
+  rows.forEach((tx) => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${formatDate(tx.date)}</td>
+      <td>${tx.description}</td>
+      <td class="${tx.amount < 0 ? 'amount-negative' : ''}">${formatCurrency(tx.amount)}</td>
+      <td></td>
+      <td><button class="secondary" data-id="${tx.id}">Excluir</button></td>
+    `;
 
     const select = document.createElement('select');
     categories.forEach((cat) => {
       const option = document.createElement('option');
       option.value = cat;
       option.textContent = cat;
-      option.selected = cat === item.category;
+      option.selected = tx.category === cat;
       select.appendChild(option);
     });
 
     select.addEventListener('change', (event) => {
-      transactions[index].category = event.target.value;
-      renderInsights();
+      tx.category = event.target.value;
+      persist();
+      renderKpis();
+      renderCategoryBars();
     });
 
-    row.innerHTML = `
-      <td>${formatDate(item.date)}</td>
-      <td>${item.description}</td>
-      <td class="${item.value < 0 ? 'value-negative' : ''}">${formatCurrency(item.value)}</td>
-      <td></td>
-    `;
+    tr.querySelector('button').addEventListener('click', () => {
+      state.transactions = state.transactions.filter((item) => item.id !== tx.id);
+      persist();
+      render();
+    });
 
-    row.children[3].appendChild(select);
-    transactionsBody.appendChild(row);
+    tr.children[3].appendChild(select);
+    els.body.appendChild(tr);
   });
 }
 
-function renderInsights() {
-  const spent = transactions.filter((item) => item.value < 0);
-  const totalSpent = spent.reduce((sum, item) => sum + Math.abs(item.value), 0);
+function renderKpis() {
+  const spent = state.transactions.filter((tx) => tx.amount < 0);
+  const total = spent.reduce((sum, tx) => sum + Math.abs(tx.amount), 0);
+  const avg = spent.length ? total / spent.length : 0;
 
-  const byCategory = spent.reduce((acc, item) => {
-    acc[item.category] = (acc[item.category] || 0) + Math.abs(item.value);
+  const monthMap = spent.reduce((acc, tx) => {
+    const month = tx.date.slice(0, 7);
+    acc[month] = (acc[month] || 0) + Math.abs(tx.amount);
     return acc;
   }, {});
 
-  const byMonth = spent.reduce((acc, item) => {
-    const month = item.date.slice(0, 7);
-    acc[month] = (acc[month] || 0) + Math.abs(item.value);
-    return acc;
-  }, {});
+  const bestMonth = Object.entries(monthMap).sort((a, b) => b[1] - a[1])[0] || ['-', 0];
 
-  const topCategory = Object.entries(byCategory).sort((a, b) => b[1] - a[1])[0] || ['-', 0];
-
-  insightsCards.innerHTML = `
-    <article class="card">
-      <span>Total gasto</span>
-      <strong>${formatCurrency(totalSpent)}</strong>
-    </article>
-    <article class="card">
-      <span>Quantidade de lançamentos</span>
-      <strong>${spent.length}</strong>
-    </article>
-    <article class="card">
-      <span>Maior área de gasto</span>
-      <strong>${topCategory[0]}</strong>
-    </article>
-    <article class="card">
-      <span>Valor na maior área</span>
-      <strong>${formatCurrency(topCategory[1])}</strong>
-    </article>
+  els.kpis.innerHTML = `
+    <article class="kpi"><span>Total gasto</span><strong>${formatCurrency(total)}</strong></article>
+    <article class="kpi"><span>Qtd. de gastos</span><strong>${spent.length}</strong></article>
+    <article class="kpi"><span>Ticket médio</span><strong>${formatCurrency(avg)}</strong></article>
+    <article class="kpi"><span>Mês com maior gasto</span><strong>${bestMonth[0]} · ${formatCurrency(bestMonth[1])}</strong></article>
   `;
-
-  drawCategoryChart(byCategory);
-  drawMonthlyChart(byMonth);
 }
 
-function drawCategoryChart(values) {
-  const ctx = document.getElementById('categoryChart');
-  if (categoryChart) categoryChart.destroy();
+function renderCategoryBars() {
+  const spent = state.transactions.filter((tx) => tx.amount < 0);
+  const byCat = spent.reduce((acc, tx) => {
+    acc[tx.category] = (acc[tx.category] || 0) + Math.abs(tx.amount);
+    return acc;
+  }, {});
 
-  categoryChart = new Chart(ctx, {
-    type: 'doughnut',
-    data: {
-      labels: Object.keys(values),
-      datasets: [{
-        data: Object.values(values),
-        backgroundColor: ['#2155cd', '#3b82f6', '#60a5fa', '#93c5fd', '#a78bfa', '#34d399', '#fbbf24', '#f87171', '#9ca3af']
-      }]
-    },
-    options: {
-      plugins: {
-        title: {
-          display: true,
-          text: 'Distribuição de gastos por área'
-        }
-      }
-    }
-  });
+  const entries = Object.entries(byCat).sort((a, b) => b[1] - a[1]);
+  const maxValue = entries[0]?.[1] || 1;
+
+  els.bars.innerHTML = entries.length
+    ? entries.map(([category, value]) => `
+      <article class="bar-row">
+        <strong>${category} · ${formatCurrency(value)}</strong>
+        <div class="bar-track"><div class="bar-fill" style="width:${(value / maxValue) * 100}%"></div></div>
+      </article>
+    `).join('')
+    : '<p class="hint">Sem gastos para analisar ainda.</p>';
 }
 
-function drawMonthlyChart(values) {
-  const ctx = document.getElementById('monthlyChart');
-  if (monthlyChart) monthlyChart.destroy();
+function persist() {
+  localStorage.setItem('financartao_transactions', JSON.stringify(state.transactions));
+}
 
-  monthlyChart = new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels: Object.keys(values),
-      datasets: [{
-        label: 'Total gasto por mês (R$)',
-        data: Object.values(values),
-        backgroundColor: '#2155cd'
-      }]
-    },
-    options: {
-      scales: {
-        y: {
-          beginAtZero: true
-        }
-      }
-    }
-  });
+function loadStorage() {
+  try {
+    const raw = localStorage.getItem('financartao_transactions');
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
 }
 
 function formatCurrency(value) {
