@@ -14,15 +14,16 @@ Projeto web para análise de gastos de cartão com classificação por categoria
 - Persistência local das categorias (`localStorage`).
 - Sincronização opcional com Supabase.
 
-## Rodando localmente
-```bash
-python3 -m http.server 4173
-```
-Depois abra `http://127.0.0.1:4173`.
+## Rodar no Windows (sem terminal)
+Como o projeto é estático, você pode abrir o `index.html` com duplo clique.
 
-## Conectando no Supabase
+Se o navegador bloquear algo, use uma opção sem terminal:
+- **VS Code + extensão Live Server** (botão "Go Live").
+- **Python Launcher no Windows** (opcional): `py -m http.server 4173` no PowerShell.
+
+## Conectando no Supabase (sem terminal)
 1. Crie um projeto no Supabase.
-2. Rode este SQL no **SQL Editor**:
+2. Vá em **SQL Editor** e execute:
 
 ```sql
 create table if not exists public.transaction_categories (
@@ -34,26 +35,27 @@ create table if not exists public.transaction_categories (
 );
 ```
 
-3. Na tela do app, preencha:
+3. Vá em **Project Settings > API** e copie:
+   - `Project URL`
+   - `anon public key`
+4. No app, preencha:
    - `Supabase URL`
    - `Supabase anon key`
-   - `user_id` (UUID do usuário dono dos dados)
-4. Clique em **Conectar** e depois **Sincronizar agora**.
+   - `user_id` (UUID do usuário)
+5. Clique em **Conectar** e depois em **Sincronizar agora**.
 
-## Subir para GitHub
-Eu não consigo autenticar na sua conta automaticamente, mas deixei tudo pronto. No seu terminal, execute:
+## Subir para GitHub no Windows (sem terminal)
+### Opção 1 — GitHub Desktop (recomendado)
+1. Instale e abra o **GitHub Desktop**.
+2. Clique em **Add an Existing Repository from your Hard Drive** e selecione esta pasta.
+3. Faça o primeiro commit pela interface.
+4. Clique em **Publish repository**.
+5. Marque público/privado e confirme.
 
-```bash
-git init
-git add .
-git commit -m "feat: radar do cartao com supabase"
-git branch -M main
-git remote add origin https://github.com/SEU_USUARIO/SEU_REPO.git
-git push -u origin main
-```
+### Opção 2 — Pelo site do GitHub
+1. Crie um repositório novo no site do GitHub.
+2. Clique em **uploading an existing file**.
+3. Arraste os arquivos (`index.html`, `styles.css`, `app.js`, `README.md`).
+4. Confirme com **Commit changes**.
 
-Se você usar GitHub CLI:
-```bash
-gh auth login
-gh repo create SEU_REPO --public --source=. --remote=origin --push
-```
+> Se quiser, no próximo passo eu te guio com cliques tela a tela (GitHub Desktop + Supabase).
