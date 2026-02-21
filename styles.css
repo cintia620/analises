@@ -1,0 +1,62 @@
+:root {
+  --bg: #f3f6ff;
+  --panel: #fff;
+  --text: #111827;
+  --muted: #6b7280;
+  --primary: #304ffe;
+  --danger: #b91c1c;
+  --border: #e5e7eb;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: Inter, system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+.app {
+  width: min(1080px, 92%);
+  margin: 1.5rem auto 2rem;
+  display: grid;
+  gap: 1rem;
+}
+.hero h1 { margin: 0; }
+.hero p { margin: .4rem 0 0; color: var(--muted); }
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1rem;
+}
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(120px, 1fr));
+  gap: .7rem;
+  align-items: end;
+}
+label { display: grid; gap: .3rem; font-size: .9rem; }
+input, select, button {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: .55rem .7rem;
+}
+button { background: var(--primary); color: white; border-color: var(--primary); cursor: pointer; }
+button.secondary { background: #fff; color: var(--text); }
+button.danger { background: var(--danger); border-color: var(--danger); }
+.upload-row { display: flex; gap: .5rem; margin-top: .9rem; flex-wrap: wrap; }
+.hint { color: var(--muted); margin-bottom: 0; }
+.kpis { display: grid; grid-template-columns: repeat(auto-fit,minmax(160px,1fr)); gap: .6rem; }
+.kpi { border: 1px solid var(--border); border-radius: 10px; padding: .65rem; }
+.kpi strong { display: block; font-size: 1.2rem; margin-top: .2rem; }
+.table-header { display: flex; justify-content: space-between; gap: .7rem; align-items: center; }
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; }
+th,td { border-bottom: 1px solid var(--border); padding: .6rem; text-align: left; }
+.amount-negative { color: var(--danger); font-weight: 600; }
+#categoryBars { display: grid; gap: .5rem; }
+.bar-row { display: grid; gap: .2rem; }
+.bar-track { height: 12px; background: #e6ecff; border-radius: 999px; overflow: hidden; }
+.bar-fill { height: 100%; background: linear-gradient(90deg, #304ffe, #5c7cfa); }
+@media (max-width: 900px) {
+  .form-grid { grid-template-columns: 1fr 1fr; }
+}
