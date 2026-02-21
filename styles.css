@@ -1,0 +1,81 @@
+:root {
+  --bg: #f3f5f8;
+  --panel: #fff;
+  --text: #0f172a;
+  --muted: #64748b;
+  --border: #e2e8f0;
+  --primary: #2563eb;
+  --danger: #b91c1c;
+  --success: #166534;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: Inter, system-ui, sans-serif;
+  color: var(--text);
+  background: var(--bg);
+}
+.container {
+  width: min(1120px, 92%);
+  margin: 1.5rem auto 2rem;
+  display: grid;
+  gap: 1rem;
+}
+.hero h1 { margin: 0; }
+.hero p { margin: .3rem 0 0; color: var(--muted); }
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1rem;
+}
+.upload .actions, .filters, .supabase-panel .actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .6rem;
+  align-items: center;
+}
+.supabase-panel input {
+  min-width: 220px;
+  flex: 1;
+}
+button, input[type='file'], input[type='text'], input[type='password'], select {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: .5rem .75rem;
+  background: #fff;
+}
+button {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
+  cursor: pointer;
+}
+button[disabled] { opacity: .6; cursor: not-allowed; }
+.hint { color: var(--muted); margin-bottom: 0; }
+.hint.error { color: var(--danger); }
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit,minmax(190px,1fr));
+  gap: .7rem;
+}
+.card {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: .7rem;
+}
+.card span { color: var(--muted); font-size: .9rem; }
+.card strong { font-size: 1.2rem; display: block; }
+.grid-2 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit,minmax(280px,1fr));
+  gap: 1rem;
+}
+canvas { width: 100% !important; max-height: 320px; }
+.merchant-list { margin: 0; padding-left: 1.2rem; }
+.merchant-list li { margin: .3rem 0; }
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; }
+th, td { text-align: left; border-bottom: 1px solid var(--border); padding: .6rem; }
+.negative { color: var(--danger); font-weight: 600; }
+.positive { color: var(--success); font-weight: 600; }

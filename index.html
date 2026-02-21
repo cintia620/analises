@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Radar do Cartão</title>
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+  <main class="container">
+    <header class="hero">
+      <h1>Radar do Cartão</h1>
+      <p>Análise profunda dos seus gastos com classificação por área, filtros e tendências mensais.</p>
+    </header>
+
+    <section class="panel upload">
+      <h2>Importação</h2>
+      <div class="actions">
+        <input id="csvInput" type="file" accept=".csv" />
+        <button id="loadSampleBtn" type="button">Carregar exemplo</button>
+        <button id="downloadBtn" type="button" disabled>Exportar CSV categorizado</button>
+      </div>
+      <p class="hint">Formato esperado: <code>data,descricao,valor</code>. Valores negativos representam despesas.</p>
+    </section>
+
+    <section class="panel supabase-panel">
+      <h2>Supabase (opcional)</h2>
+      <div class="actions">
+        <input id="supabaseUrl" type="text" placeholder="https://SEU-PROJETO.supabase.co" />
+        <input id="supabaseAnonKey" type="password" placeholder="Sua anon key" />
+        <input id="supabaseUserId" type="text" placeholder="Seu user_id (UUID)" />
+        <button id="connectSupabaseBtn" type="button">Conectar</button>
+        <button id="syncSupabaseBtn" type="button" disabled>Sincronizar agora</button>
+      </div>
+      <p id="supabaseStatus" class="hint">Sem conexão com banco remoto.</p>
+    </section>
+
+    <section id="dashboard" hidden>
+      <section class="panel filters">
+        <h2>Filtros</h2>
+        <label>Mês
+          <select id="monthFilter"></select>
+        </label>
+        <label>Categoria
+          <select id="categoryFilter"></select>
+        </label>
+      </section>
+
+      <section class="panel">
+        <h2>Indicadores</h2>
+        <div class="cards" id="insightsCards"></div>
+      </section>
+
+      <section class="panel grid-2">
+        <div>
+          <h3>Gasto por categoria</h3>
+          <canvas id="categoryChart" aria-label="Gastos por categoria" role="img"></canvas>
+        </div>
+        <div>
+          <h3>Evolução mensal</h3>
+          <canvas id="monthlyChart" aria-label="Evolução mensal" role="img"></canvas>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>Top estabelecimentos</h2>
+        <ul id="merchantList" class="merchant-list"></ul>
+      </section>
+
+      <section class="panel">
+        <h2>Lançamentos</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Data</th>
+                <th>Descrição</th>
+                <th>Valor</th>
+                <th>Categoria</th>
+              </tr>
+            </thead>
+            <tbody id="transactionsBody"></tbody>
+          </table>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
