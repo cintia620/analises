@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Análise de Gastos no Cartão</title>
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <main class="container">
+    <header>
+      <h1>Análise Profunda de Gastos no Cartão</h1>
+      <p>
+        Importe sua fatura em CSV e classifique cada gasto por área para descobrir onde o dinheiro está indo.
+      </p>
+    </header>
+
+    <section class="panel upload-panel">
+      <h2>1) Importar fatura (CSV)</h2>
+      <p class="hint">Formato esperado: <strong>data,descricao,valor</strong> (valor pode ser negativo ou positivo).</p>
+      <input id="csvInput" type="file" accept=".csv" />
+      <button id="loadSampleBtn" type="button">Carregar exemplo</button>
+    </section>
+
+    <section class="panel" id="transactionsPanel" hidden>
+      <h2>2) Classificar gastos por área</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Data</th>
+              <th>Descrição</th>
+              <th>Valor (R$)</th>
+              <th>Área</th>
+            </tr>
+          </thead>
+          <tbody id="transactionsBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel" id="insightsPanel" hidden>
+      <h2>3) Insights</h2>
+      <div class="cards" id="insightsCards"></div>
+      <canvas id="categoryChart" aria-label="Gráfico por área" role="img"></canvas>
+      <canvas id="monthlyChart" aria-label="Gráfico mensal" role="img"></canvas>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
